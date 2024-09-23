@@ -163,7 +163,7 @@ if sys.version_info >= (3, 3):
 # end of dynamic code for typing
 
 
-def hex_to_hash(hexstr):
+def hex_to_hash(multihexstr):
 	# type: (str) -> ImageHash
 	"""
 	Convert a stored hash (hex, as retrieved from str(Imagehash))
@@ -175,12 +175,17 @@ def hex_to_hash(hexstr):
 			or onedimensional arrays with dimensions binbits * 14.
 	2. This algorithm does not work for hash_size < 2.
 	"""
-	hash_size = int(numpy.sqrt(len(hexstr) * 4))
-	# assert hash_size == numpy.sqrt(len(hexstr)*4)
-	binary_array = '{:0>{width}b}'.format(int(hexstr, 16), width=hash_size * hash_size)
-	bit_rows = [binary_array[i:i + hash_size] for i in range(0, len(binary_array), hash_size)]
-	hash_array = numpy.array([[bool(int(d)) for d in row] for row in bit_rows])
-	return ImageHash(hash_array)
+
+	hash_array_list = []
+	for hexstr in multihexstr.split(','):
+		hash_size = int(numpy.sqrt(len(hexstr) * 4))
+		# assert hash_size == numpy.sqrt(len(hexstr)*4)
+		binary_array = '{:0>{width}b}'.format(int(hexstr, 16), width=hash_size * hash_size)
+		bit_rows = [binary_array[i:i + hash_size] for i in range(0, len(binary_array), hash_size)]
+		hash_row = numpy.array([[bool(int(d)) for d in row] for row in bit_rows])
+		hash_array_list.append(hash_row)
+
+	return ImageHash(hash_array_list)
 
 
 def hex_to_flathash(hexstr, hashsize):
